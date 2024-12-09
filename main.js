@@ -1,45 +1,46 @@
+const { app, BrowserWindow } = require('electron');
+const path = require('node:path');
+const { autoUpdater } = require('electron-updater'); // Ajout pour gestion fine des mises à jour
+const { updateElectronApp } = require('update-electron-app');
 
-const { app, BrowserWindow } = require('electron')
-const path = require('node:path')
-const{updateElectronApp} = require('update-electron-app')
-updateElectronApp();
+updateElectronApp({
+  repo: 'Amine/electron-app', // Remplacez par votre dépôt GitHub
+  updateInterval: '1 hour',  // Vérifie les mises à jour toutes les heures
+  logger: require('electron-log'), // Pour voir les logs
+});
 
 const createWindow = () => {
-  // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js')
-    }
-  })
+      preload: path.join(__dirname, 'preload.js'),
+    },
+  });
 
-  // and load the index.html of the app.
-  mainWindow.loadFile('index.html')
+  mainWindow.loadFile('index.html');
 
-  // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
-}
+  // Ajoutez la gestion des mises à jour ici
+  autoUpdater.on('update-available', () => {
+    console.log('Mise à jour disponible !');
+    mainWindow.webContents.send('update_available');
+  });
 
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
+  autoUpdater.on('update-downloaded', () => {
+    console.log('Mise à jour téléchargée. Redémarrage requis.');
+    mainWindow.webContents.send('update_downloaded');
+  });
+};
+
+// Initialisation de l'application
 app.whenReady().then(() => {
-  createWindow()
+  createWindow();
 
   app.on('activate', () => {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
-  })
-})
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
+});
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit()
-})
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+  if (process.platform !== 'darwin') app.quit();
+});
