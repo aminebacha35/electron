@@ -4,9 +4,8 @@ const { autoUpdater } = require('electron-updater'); // Ajout pour gestion fine 
 const { updateElectronApp } = require('update-electron-app');
 
 updateElectronApp({
-  repo: 'aminebacha35/electron', // Remplacez par votre dépôt GitHub
+  repo: 'aminebacha35/electron',
   updateInterval: '1 hour',  // Vérifie les mises à jour toutes les heures
-  logger: require('electron-log'), // Pour voir les logs
 });
 
 const createWindow = () => {
